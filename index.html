@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All In One Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="overlay" id="overlay" onclick="closeMenu()"></div>
+
+    <div class="sidebar" id="sidebar">
+        <span class="close-btn" onclick="closeMenu()">&times;</span>
+        
+        <div class="profile-section">
+            <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Profile" class="profile-img" id="profilePicPreview">
+            <div class="profile-input-group">
+                <label>Profile Photo:</label>
+                <input type="file" id="imageInput" accept="image/*">
+            </div>
+            <div class="profile-input-group">
+                <label>Your Name:</label>
+                <input type="text" id="nameInput" placeholder="Enter your name">
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h3>Settings</h3>
+            <div class="volume-control">
+                <span>🔈</span>
+                <input type="range" id="volumeSlider" min="0" max="100" value="50">
+                <span>🔊</span>
+            </div>
+        </div>
+
+        <button class="save-btn" onclick="saveData()">Save Settings</button>
+    </div>
+
+    <div class="navbar">
+        <div class="menu-icon" onclick="openMenu()">&#9776;</div>
+        <div class="nav-title">ALL IN ONE GAME</div>
+    </div>
+
+    <div class="game-container">
+        <button class="game-btn" onclick="window.location.href='tictactoe.html'">
+    <div class="game-box">
+        <div class="game-image-placeholder" style="background-image: url('tictactoe.png');"></div>
+    </div>
+    <div class="game-title">Tic Tac Toe</div>
+</button>
+
+        <button class="game-btn" onclick="window.location.href=''">
+            <div class="game-box">
+           <div class="game-image-placeholder" style="background-image: url('images.jpeg');"> </div>
+            </div>
+            <div class="game-title">candy crush</div>
+        </button>
+        <button class="game-btn" onclick="window.location.href='flappy.html'">
+            <div class="game-box">
+              <div class="game-image-placeholder" style="background-image: url('bird.png');"> </div>
+            </div>
+            <div class="game-title"> Flappy bird </div>
+        </button>
+        <button class="game-btn" onclick="window.location.href='snake.html'">
+            <div class="game-box">
+              <div class="game-image-placeholder" style="background-image: url('snake.jpeg');"></div>
+            </div>
+            <div class="game-title">Snake</div>
+        </button>
+        <button class="game-btn" onclick="window.location.href='ludo.html'">
+            <div class="game-box">
+              <div class="game-image-placeholder" style="background-image: url('ludo.jpeg');"></div>
+            </div>
+            <div class="game-title">Ludo</div>
+        </button>
+        <button class="game-btn" onclick="window.location.href=''">
+            <div class="game-box">
+              <div class="game-image-placeholder" style="background-image: url('minecraft.jpg');"> </div>
+            </div>
+            <div class="game-title">Minecraft</div>
+        </button>
+        <button class="game-btn" onclick="window.location.href='guessing.html'">
+            <div class="game-box">
+           <div class="game-image-placeholder" style="background-image: url('guess.jpeg');"></div>
+            </div>
+            <div class="game-title">Guessing The Number</div>
+        </button>
+        <button class="game-btn" onclick="window.location.href=''">
+            <div class="game-box">
+             <div class="game-image-placeholder" style="background-image: url('');"></div>
+            </div>
+            <div class="game-title">Game H</div>
+        </button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

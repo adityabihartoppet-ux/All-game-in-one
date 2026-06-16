@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Snake Game</title>
+    <link rel="stylesheet" href="snake.css">
+</head>
+<body>
+    <div id="main-menu" class="screen">
+        <h1>Snake Game</h1>
+        <p>Best Score: <span id="menu-high-score">0</span></p>
+        <button onclick="startGame('easy')">Easy Mode</button>
+        <button onclick="startGame('hard')">Hard Mode</button>
+      <button onclick="window.location.href='index.html'" class="secondary-btn" style="background-color: #e74c3c; margin-top: 10px;">Exit to Main App</button>
+
+    </div>
+
+    <div id="game-screen" class="screen hidden">
+        <div class="header">
+            <div class="score-board">Score: <span id="score">0</span></div>
+            <div class="score-board">Best: <span id="high-score">0</span></div>
+        </div>
+        <canvas id="gameCanvas"></canvas>
+        
+        <div id="game-over" class="hidden">
+            <h2>Game Over!</h2>
+            <p>Score: <span id="final-score">0</span></p>
+            <button onclick="showMenu()">Main Menu</button>
+        </div>
+    </div>
+
+    <script src="snake.js"></script>
+</body>
+</html>

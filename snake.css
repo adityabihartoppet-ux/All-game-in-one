@@ -1,0 +1,97 @@
+
+* { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+}
+
+body { 
+    font-family: sans-serif; 
+    background-color: #222; 
+    color: white; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    height: 100vh; 
+    overflow: hidden; 
+    /* Swipe karte waqt screen refresh ya scroll hone se rokne ke liye */
+    touch-action: none; 
+    overscroll-behavior-y: none; 
+    overscroll-behavior: none;
+}
+
+.screen { 
+    width: 100%; 
+    max-width: 400px; 
+    height: 100vh; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+    position: relative; 
+}
+
+.hidden { 
+    display: none !important; 
+}
+
+#main-menu h1 { 
+    color: #4CAF50; 
+    margin-bottom: 20px; 
+    font-size: 3em; 
+    text-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+}
+
+button { 
+    background-color: #4CAF50; 
+    color: white; 
+    border: none; 
+    padding: 15px 30px; 
+    margin: 10px; 
+    font-size: 1.2em; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    width: 200px; 
+    font-weight: bold;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+button:active { 
+    transform: scale(0.98); 
+}
+
+.header { 
+    display: flex; 
+    justify-content: space-between; 
+    width: 100%; 
+    padding: 15px 20px; 
+    font-size: 1.2em; 
+    background: #333; 
+    border-bottom: 2px solid #4CAF50;
+}
+
+canvas { 
+    background-color: #000; 
+    display: block; 
+    margin: auto;
+}
+
+#game-over { 
+    position: absolute; 
+    top: 50%; 
+    left: 50%; 
+    transform: translate(-50%, -50%); 
+    background: rgba(0,0,0,0.9); 
+    padding: 40px; 
+    text-align: center; 
+    border-radius: 10px; 
+    border: 2px solid #4CAF50; 
+    width: 80%;
+}
+
+#game-over h2 {
+    color: #ff3333;
+    margin-bottom: 10px;
+}
+
+

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 WELCOME TO THE GUESSING GAME 🎮</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            max-width: 450px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #ffd700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .divider {
+            height: 2px;
+            background: #ffd700;
+            margin: 15px 0;
+        }
+
+        p {
+            font-size: 16px;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .input-area {
+            margin: 20px 0;
+        }
+
+        input[type="number"] {
+            padding: 10px;
+            font-size: 18px;
+            width: 120px;
+            border: none;
+            border-radius: 5px;
+            text-align: center;
+            outline: none;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #ffd700;
+            color: #1e3c72;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s ease;
+            margin-left: 10px;
+        }
+
+        button:hover {
+            background-color: #fff;
+            transform: scale(1.05);
+        }
+ 
+        .message {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+            min-height: 27px;
+        }
+
+        .attempts {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #ddd;
+        }
+
+        .reset-btn {
+            display: none;
+            margin-top: 20px;
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .reset-btn:hover {
+            background-color: #218838;
+        }
+    </style>
+    
+</head>
+<body>
+
+<div class="game-container">
+    <h1>======================</h1>
+    <h1>🎮 WELCOME TO THE GUESSING GAME 🎮</h1>
+    <h1>======================</h1>
+    
+    <div class="divider"></div>
+    
+    <p><strong>मैसेज:</strong> मैंने 1 से 100 के बीच एक नंबर सोचा है।</p>
+    <p>क्या आप बता सकते हैं वो नंबर कौन सा है?</p>
+
+    <div class="input-area">
+        <input type="number" id="userGuess" min="1" max="100" placeholder="0">
+        <button onclick="checkGuess()" id="submitBtn">Guess</button>
+    </div>
+
+    <div class="message" id="message"></div>
+    <div class="attempts" id="attemptsText"></div>
+    
+    <button onclick="resetGame()" class="reset-btn" id="resetBtn">फिर से खेलें 🔄</button>
+    <button onclick="window.location.href='index.html'" class="secondary-btn" style="background-color: #e74c3c; margin-top: 10px;">Exit to Main App</button>
+
+    <div class="divider" style="margin-top: 25px;"></div>
+    <h1>======================</h1>
+</div>
+
+<script>
+    // गेम वेरिएबल्स
+    let secretNumber;
+    let attempts;
+
+    // गेम शुरू करने का फंक्शन
+    function initGame() {
+        secretNumber = Math.floor(Math.random() * 100) + 1; // 1 से 100 के बीच रैंडम नंबर
+        attempts = 0;
+        document.getElementById("message").innerText = "";
+        document.getElementById("message").style.color = "#fff";
+        document.getElementById("attemptsText").innerText = "";
+        document.getElementById("userGuess").value = "";
+        document.getElementById("userGuess").disabled = false;
+        document.getElementById("submitBtn").disabled = false;
+        document.getElementById("resetBtn").style.display = "none";
+    }
+
+    // यूजर के अनुमान को चेक करने का फंक्शन
+    function checkGuess() {
+        let guessInput = document.getElementById("userGuess");
+        let userGuess = parseInt(guessInput.value);
+        let messageElement = document.getElementById("message");
+        let attemptsElement = document.getElementById("attemptsText");
+
+        // वैलिडेशन
+        if (isNaN(userGuess) || userGuess < 1 || userGuess > 100) {
+            messageElement.innerText = "⚠️ कृपया 1 से 100 के बीच का नंबर डालें!";
+            messageElement.style.color = "#ff4d4d";
+            return;
+        }
+
+        attempts++;
+
+        if (userGuess > secretNumber) {
+            messageElement.innerText = "❌ बहुत बड़ा नंबर है! थोड़ा छोटा नंबर सोचें।";
+            messageElement.style.color = "#ff4d4d";
+            guessInput.value = "";
+        } else if (userGuess < secretNumber) {
+            messageElement.innerText = "❌ बहुत छोटा नंबर है! थोड़ा बड़ा नंबर सोचें।";
+            messageElement.style.color = "#ff4d4d";
+            guessInput.value = "";
+        } else {
+            messageElement.innerText = "🎉 बधाई हो! आपने सही नंबर खोज लिया! 🎉";
+            messageElement.style.color = "#28a745";
+            attemptsElement.innerHTML = `🏆 <strong>कुल प्रयास (Total Attempts):</strong> ${attempts}`;
+            
+            // गेम ओवर होने पर इनपुट बंद करना और रीसेट बटन दिखाना
+            guessInput.disabled = true;
+            document.getElementById("submitBtn").disabled = true;
+            document.getElementById("resetBtn").style.display = "inline-block";
+        }
+        
+        guessInput.focus();
+    }
+
+    // 'Enter' की दबाने पर भी Guess सबमिट हो जाए
+    document.getElementById("userGuess").addEventListener("keyup", function(event) {
+        if (event.key === "Enter") {
+            checkGuess();
+        }
+    });
+
+    // गेम को पहली बार लोड करना
+    initGame();
+
+    function resetGame() {
+        initGame();
+    }
+</script>
+
+</body>
+</html>

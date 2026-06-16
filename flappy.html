@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Flappy Bird</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #222;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+        }
+        #game-container {
+            position: relative;
+            width: 320px;
+            height: 480px;
+            background-color: #70c5ce;
+            border: 2px solid #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        }
+        canvas {
+            display: block;
+        }
+        /* UI Screens Overlay */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            z-index: 10;
+        }
+        h1 { margin: 0 0 20px 0; color: #f4d03f; text-shadow: 2px 2px 0 #000; }
+        .btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 4px #c0392b;
+            font-weight: bold;
+            width: 150px;
+        }
+        .btn:active {
+            box-shadow: 0 0 #c0392b;
+            transform: translateY(4px);
+        }
+        .btn.easy { background-color: #2ecc71; box-shadow: 0 4px #27ae60; }
+        .btn.easy:active { box-shadow: 0 0 #27ae60; }
+        .btn.normal { background-color: #f1c40f; box-shadow: 0 4px #f39c12; color: #000;}
+        .btn.normal:active { box-shadow: 0 0 #f39c12; }
+        .btn.hard { background-color: #e74c3c; box-shadow: 0 4px #c0392b; }
+        
+        #score-board {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <canvas id="gameCanvas" width="320" height="480"></canvas>
+    
+    <!-- Main Menu Screen -->
+    <div id="start-menu" class="screen">
+        <h1>Flappy Bird </h1>
+        <p>Select Difficulty to Start</p>
+        <button class="btn easy" onclick="startGame(150)">Easy</button>
+        <button class="btn normal" onclick="startGame(110)">Normal</button>
+        <button class="btn hard" onclick="startGame(80)">Hard</button>
+        <button onclick="window.location.href='index.html'" class="secondary-btn" style="background-color: #e74c3c; margin-top: 10px;">Exit to Main App</button>
+
+        <p style="margin-top:20px; font-size:14px;">Best Score: <span id="menu-best">0</span></p>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="game-over-menu" class="screen" style="display: none;">
+        <h1>Game Over!</h1>
+        <div id="score-board">
+            Score: <span id="go-score">0</span><br>
+            Best: <span id="go-best">0</span>
+        </div>
+        <button class="btn" onclick="showMenu()">Main Menu</button>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    // UI Elements
+    const startMenu = document.getElementById("start-menu");
+    const gameOverMenu = document.getElementById("game-over-menu");
+    const menuBest = document.getElementById("menu-best");
+    const goScore = document.getElementById("go-score");
+    const goBest = document.getElementById("go-best");
+
+    // Game Variables
+    let frames = 0;
+    let pipeGap = 110; // Default Normal
+    let score = 0;
+    let bestScore = localStorage.getItem("flappyBestScore") || 0;
+    menuBest.innerText = bestScore;
+    let gameState = "START"; // START, PLAYING, GAMEOVER
+    let animationId;
+
+    // Web Audio API for sound (No external files needed)
+    let audioCtx;
+    function playCoinSound() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        
+        oscillator.type = 'sine';
+        // High pitch "Ding" sound
+        oscillator.frequency.setValueAtTime(900, audioCtx.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(1500, audioCtx.currentTime + 0.1);
+        
+        gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 0.1);
+    }
+
+    // Bird Object
+    const bird = {
+        x: 50,
+        y: 150,
+        w: 20,
+        h: 20,
+        gravity: 0.1,
+        velocity: 0,
+        jump: -3.0,
+        draw: function() {
+            ctx.fillStyle = "#f1c40f"; // Yellow Bird
+            ctx.beginPath();
+            ctx.arc(this.x + this.w/2, this.y + this.h/2, this.w/2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = "#000";
+            ctx.stroke();
+            // Eye
+            ctx.fillStyle = "#fff";
+            ctx.beginPath();
+            ctx.arc(this.x + this.w/2 + 5, this.y + this.h/2 - 4, 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = "#000";
+            ctx.beginPath();
+            ctx.arc(this.x + this.w/2 + 6, this.y + this.h/2 - 4, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+        },
+        update: function() {
+            this.velocity += this.gravity;
+            this.y += this.velocity;
+            
+            // Floor collision
+            if (this.y + this.h >= canvas.height) {
+                this.y = canvas.height - this.h;
+                gameOver();
+            }
+            // Ceiling collision
+            if (this.y <= 0) {
+                this.y = 0;
+                this.velocity = 0;
+            }
+        },
+        flap: function() {
+            this.velocity = this.jump;
+        }
+    };
+
+    // Pipes & Coins Object
+    const pipes = {
+        items: [],
+        width: 40,
+        dx: 2, // Speed
+        draw: function() {
+            for (let i = 0; i < this.items.length; i++) {
+                let p = this.items[i];
+                
+                // Draw Pipes (Green)
+                ctx.fillStyle = "#2ecc71";
+                ctx.fillRect(p.x, 0, this.width, p.top);
+                ctx.fillRect(p.x, p.bottom, this.width, canvas.height - p.bottom);
+                
+                // Draw Border
+                ctx.strokeStyle = "#27ae60";
+                ctx.strokeRect(p.x, 0, this.width, p.top);
+                ctx.strokeRect(p.x, p.bottom, this.width, canvas.height - p.bottom);
+
+                // Draw Coin
+                if (!p.coinCollected) {
+                    ctx.fillStyle = "gold";
+                    ctx.beginPath();
+                    ctx.arc(p.x + this.width/2, p.coinY, 8, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = "#d4af37";
+                    ctx.stroke();
+                }
+            }
+        },
+        update: function() {
+            // Add new pipe every 100 frames
+            if (frames % 100 === 0) {
+                let minPipeHeight = 50;
+                let maxPipeHeight = canvas.height - pipeGap - minPipeHeight;
+                let randomTopHeight = Math.floor(Math.random() * (maxPipeHeight - minPipeHeight + 1) + minPipeHeight);
+                
+                this.items.push({
+                    x: canvas.width,
+                    top: randomTopHeight,
+                    bottom: randomTopHeight + pipeGap,
+                    coinY: randomTopHeight + (pipeGap / 2),
+                    coinCollected: false,
+                    passed: false
+                });
+            }
+
+            for (let i = 0; i < this.items.length; i++) {
+                let p = this.items[i];
+                p.x -= this.dx; // Move Left
+
+                // Collision with Pipes
+                if (bird.x + bird.w > p.x && bird.x < p.x + this.width) {
+                    if (bird.y < p.top || bird.y + bird.h > p.bottom) {
+                        gameOver();
+                    }
+                }
+
+                // Coin Collection
+                if (!p.coinCollected) {
+                    // Simple distance check between bird center and coin center
+                    let bcX = bird.x + bird.w/2;
+                    let bcY = bird.y + bird.h/2;
+                    let coinX = p.x + this.width/2;
+                    let dist = Math.hypot(bcX - coinX, bcY - p.coinY);
+                    
+                    if (dist < (bird.w/2 + 10)) { // 10 is approx coin radius + padding
+                        p.coinCollected = true;
+                        score++;
+                        playCoinSound();
+                    }
+                }
+
+                // Remove off-screen pipes
+                if (p.x + this.width <= 0) {
+                    this.items.shift();
+                    i--;
+                }
+            }
+        },
+        reset: function() {
+            this.items = [];
+        }
+    };
+
+    // Main Game Loop
+    function loop() {
+        if (gameState !== "PLAYING") return;
+        
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        bird.update();
+        pipes.update();
+        
+        pipes.draw();
+        bird.draw();
+        
+        // Draw UI Score
+        ctx.fillStyle = "#fff";
+        ctx.strokeStyle = "#000";
+        ctx.lineWidth = 2;
+        ctx.font = "25px Tahoma";
+        ctx.fillText("💰 " + score, 10, 30);
+        ctx.strokeText("💰 " + score, 10, 30);
+        
+        frames++;
+        animationId = requestAnimationFrame(loop);
+    }
+
+    // Controls
+    window.addEventListener("keydown", function(e) {
+        if ((e.code === "Space" || e.code === "ArrowUp") && gameState === "PLAYING") {
+            bird.flap();
+        }
+    });
+
+    canvas.addEventListener("touchstart", function() {
+        if (gameState === "PLAYING") bird.flap();
+    });
+    
+    canvas.addEventListener("mousedown", function() {
+        if (gameState === "PLAYING") bird.flap();
+    });
+
+    // Start Game Function
+    function startGame(gap) {
+        // Initialize AudioContext on first user interaction
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        
+        pipeGap = gap;
+        bird.y = 150;
+        bird.velocity = 0;
+        pipes.reset();
+        score = 0;
+        frames = 0;
+        gameState = "PLAYING";
+        
+        startMenu.style.display = "none";
+        gameOverMenu.style.display = "none";
+        
+        cancelAnimationFrame(animationId);
+        loop();
+    }
+
+    // Game Over Function
+    function gameOver() {
+        gameState = "GAMEOVER";
+        cancelAnimationFrame(animationId);
+        
+        // Save Best Score
+        if (score > bestScore) {
+            bestScore = score;
+            localStorage.setItem("flappyBestScore", bestScore);
+        }
+        
+        goScore.innerText = score;
+        goBest.innerText = bestScore;
+        gameOverMenu.style.display = "flex";
+    }
+
+    // Show Menu
+    function showMenu() {
+        menuBest.innerText = bestScore;
+        gameOverMenu.style.display = "none";
+        startMenu.style.display = "flex";
+    }
+
+</script>
+</body>
+</html>
